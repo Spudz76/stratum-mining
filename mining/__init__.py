@@ -31,71 +31,31 @@ def setup(on_startup):
     from lib.sia_rpc_manager import SiaRPCManager
     from lib.block_template import BlockTemplate
     from lib.coinbaser import SimpleCoinbaser
-    
+
     sia_rpc = SiaRPCManager()
-    # Check litecoind
+    
+    def _refusedHandler(e):
+        log.error('Connection problem (are your COIND_* settings correct?)')
+        log.error('Exception: %s' % str(e))
+        reactor.stop()
+
+    # Check coind
     #         Check we can connect (sleep)
     # Check the results:
     #         - getblocktemplate is avalible        (Die if not)
     #         - we are not still downloading the blockchain        (Sleep)
-    log.info('Connecting to litecoind...')
+    log.info('Connecting to siad...')
     while True:
         try:
-            result = (yield sia_rpc.check_submitblock())
-            if result == True:
-                log.info('Found submitblock')
-            elif result == False:
-                log.info('Did not find submitblock')
-            else:
-                log.info('unknown submitblock result')
+            result = (yield sia_rpc.check_ready())
+            if not result:
+                log.error('SiaD downloading blockchain... will check back in 5 sec')
+                time.sleep(4)
         except ConnectionRefusedError, e:
-            log.error('Connection refused while trying to connect to the coind (are your COIND_* settings correct?)')
-            reactor.stop()
+            (yield _refusedHandler(e))
             break
-
         except Exception, e:
             log.debug(str(e))
-
-        try:
-            result = (yield sia_rpc.getblocktemplate())
-            if isinstance(result, dict):
-                # litecoind implements version 1 of getblocktemplate
-                if result['version'] >= 1:
-                    result = (yield sia_rpc.getdifficulty())
-                    if isinstance(result,dict):
-                        if 'proof-of-stake' in result: 
-                            settings.COINDAEMON_REWARD = 'POS'
-                            log.info('Coin detected as POS')
-                            break
-                    else:
-                        settings.COINDAEMON_REWARD = 'POW'
-                        log.info('Coin detected as POW')
-                        break
-                else:
-                    log.error('Block Version mismatch: %s' % result['version'])
-
-
-        except ConnectionRefusedError, e:
-            log.error('Connection refused while trying to connect to the coind (are your COIND_* settings correct?)')
-            reactor.stop()
-            break
-
-        except Exception, e:
-            if isinstance(e[2], str):
-                try:
-                    if isinstance(json.loads(e[2])['error']['message'], str):
-                        error = json.loads(e[2])['error']['message']
-                    if error == 'Method not found':
-                        log.error('CoinD does not support getblocktemplate!!! (time to upgrade.)')
-                        reactor.stop()
-                    elif 'downloading blocks' in error:
-                        log.error('CoinD downloading blockchain... will check back in 30 sec')
-                        time.sleep(29)
-                    else:
-                        log.error('Coind Error: %s', error)
-                except ValueError:
-                    log.error('Failed Connect(HTTP 500 or Invalid JSON), Check Username and Password!')
-                    reactor.stop()
         time.sleep(1)  # If we didn't get a result or the connect failed
         
     log.info('Connected to the coind - Begining to load Address and Module Checks!')
@@ -125,8 +85,3 @@ def setup(on_startup):
     
     log.info('MINING SERVICE IS READY')
     on_startup.callback(True)
-
-
-
-
-

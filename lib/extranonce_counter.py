@@ -26,3 +26,4 @@ class ExtranonceCounter(object):
     def get_new_bin(self):
         self.counter += 1
         return struct.pack('>L', self.counter)
+        

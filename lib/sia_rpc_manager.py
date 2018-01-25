@@ -1,5 +1,5 @@
 '''
-    Implements simple interface to a coin daemon's RPC.
+    Implements simple interface to Sia daemon's RPC.
 '''
 
 
@@ -80,7 +80,7 @@ class SiaRPCManager(object):
     def _call_raw(self, data):
         while True:
             try:
-                return self.conns[self.curr_conn]._call_raw(data)
+                return self.conns[self.curr_conn]._call_raw_post(data)
             except:
                 self.next_connection()
 
@@ -90,10 +90,10 @@ class SiaRPCManager(object):
                 return self.conns[self.curr_conn]._call(method,params)
             except:
                 self.next_connection()
-    def check_submitblock(self):
+    def check_ready(self):
         while True:
               try:
-                  return self.conns[self.curr_conn].check_submitblock()
+                  return self.conns[self.curr_conn].check_ready()
               except:
                   self.next_connection()
 

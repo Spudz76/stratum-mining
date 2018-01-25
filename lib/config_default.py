@@ -94,7 +94,7 @@ BROWSER_ENABLE = True
 
 # ******************** *COIND SETTINGS ************
 
-# Hostname and credentials for one trusted Sia node (Satoshi's client).
+# Hostname and credentials for one trusted Sia Daemon
 # Stratum uses both P2P port (which is 8333 everytime) and RPC port
 COINDAEMON_TRUSTED_HOST = '127.0.0.1'
 COINDAEMON_TRUSTED_PORT = 8332 # RPC port

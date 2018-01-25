@@ -80,7 +80,7 @@ class BasicShareLimiter(object):
         if 'timestamp' not in self.litecoin or self.litecoin['timestamp'] < int(time.time()) - settings.DIFF_UPDATE_FREQUENCY:
             self.litecoin['timestamp'] = time.time()
             self.litecoin['difficulty'] = (yield Interfaces.template_registry.sia_rpc.getdifficulty())
-            log.debug('Updated litecoin difficulty to %s' % (self.litecoin['difficulty']))
+            log.debug('Updated difficulty to %s' % (self.litecoin['difficulty']))
         self.litecoin_diff = self.litecoin['difficulty']
 
     def submit(self, connection_ref, job_id, current_difficulty, timestamp, worker_name):
@@ -178,3 +178,4 @@ class BasicShareLimiter(object):
         connection_ref().rpc('mining.notify', [work_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, False, ], is_notification=True)
         log.debug('Sent new work')
         dbi.update_worker_diff(worker_name, new_diff)
+

@@ -1,5 +1,5 @@
 '''
-    Implements simple interface to a coin daemon's RPC.
+    Implements simple interface to Sia daemon's RPC.
 '''
 
 import simplejson as json
@@ -8,6 +8,7 @@ from twisted.internet import defer
 from twisted.web import client
 import time
 import util
+import urllib
 import lib.logger
 import lib.settings as settings
 log = lib.logger.get_logger('sia_rpc')
@@ -19,58 +20,77 @@ class SiaRPC(object):
     def __init__(self, host, port, username, password):
         log.debug('Got to Sia RPC')
         self.sia_url = 'http://%s:%d' % (host, port)
-        self.credentials = base64.b64encode('%s:%s' % (username, password))
+        self.credentials = base64.b64encode(':%s' % password)
         self.headers = {
+            'User-Agent': 'Sia-Agent',
             'Content-Type': 'text/json',
             'Authorization': 'Basic %s' % self.credentials,
         }
         client.HTTPClientFactory.noisy = False
-        self.has_submitblock = False        
+        self.version = ''
 
-    def _call_raw(self, data):
+    def _call_raw_get(self, method, data):
+        client.Headers
+        getargs = '?%s' % urllib.urlencode(data)
+        if getargs == '?':
+            getargs = ''
+        return client.getPage(
+            url='%s/%s%s' % (self.sia_url, method, getargs),
+            method='GET',
+            headers=self.headers,
+            postdata=data,
+        )
+
+    def _call_raw_post(self, method, data):
         client.Headers
         return client.getPage(
-            url=self.sia_url,
+            url='%s/%s' % (self.sia_url, method),
             method='POST',
             headers=self.headers,
             postdata=data,
         )
-           
+
+    def _call_get(self, method, params):
+        return self._call_raw_get(
+                method,
+                params
+            )
+
     def _call(self, method, params):
-        return self._call_raw(json.dumps({
+        return self._call_raw_post(json.dumps({
                 'jsonrpc': '2.0',
                 'method': method,
                 'params': params,
                 'id': '1',
             }))
-    
-    @defer.inlineCallbacks
-    def check_submitblock(self):
-        try:
-            log.info('Checking for submitblock')
-            resp = (yield self._call('submitblock', []))
-            self.has_submitblock = True
-        except Exception as e:
-            if (str(e) == '404 Not Found'):
-                log.debug('No submitblock detected.')
-                self.has_submitblock = False
-            elif (str(e) == '500 Internal Server Error'):
-                log.debug('submitblock detected.')
-                self.has_submitblock = True
-            else:
-                log.debug('unknown submitblock check result.')
-                self.has_submitblock = True
-        finally:
-              defer.returnValue(self.has_submitblock)
 
-    
+    @defer.inlineCallbacks
+    def check_ready(self):
+        self.consensus_ready = False
+        try:
+            log.info('Checking Sia Daemon')
+            resp = (yield self._call_raw_get('daemon/version'))
+            self.version = json.loads(resp)['version']
+            log.debug('Sia Daemon responded, version %s', self.version)
+            resp = (yield self._call_raw_get('consensus'))
+            consensus = json.loads(resp)
+            if consensus['synced']:
+                self.consensus_ready = True
+                log.debug(
+                    'Consensus synced, height %d, difficulty %d',
+                    consensus['height'], consensus['difficulty'] )
+        except Exception as e:
+            log.debug('Sia Daemon error: %s' % str(e))
+        finally:
+              defer.returnValue(self.consensus_ready)
+
     @defer.inlineCallbacks
     def submitblock(self, block_hex, hash_hex, scrypt_hex):
-  #try 5 times? 500 Internal Server Error could mean random error or that TX messages setting is wrong
+        #try 5 times? 500 Internal Server Error could mean random error or that TX messages setting is wrong
         attempts = 0
         while True:
             attempts += 1
-            if self.has_submitblock == True:
+            if self.consensus_ready == True:
                 try:
                     log.debug('Submitting Block with submitblock: attempt #' + str(attempts))
                     log.debug([block_hex,])
@@ -84,7 +104,7 @@ class SiaRPC(object):
                         raise
                     else:
                         continue
-            elif self.has_submitblock == False:
+            elif self.consensus_ready == False:
                 try:
                     log.debug('Submitting Block with getblocktemplate submit: attempt #' + str(attempts))
                     log.debug([block_hex,])
@@ -97,7 +117,7 @@ class SiaRPC(object):
                         raise
                     else:
                         continue
-            else:  # self.has_submitblock = None; unable to detect submitblock, try both
+            else:  # self.consensus_ready = None; unable to detect submitblock, try both
                 try:
                     log.debug('Submitting Block with submitblock')
                     log.debug([block_hex,])
