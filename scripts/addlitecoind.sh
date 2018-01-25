@@ -21,9 +21,9 @@ parser.add_argument('--lpassword', dest='lpassword', type=str, default='somelarg
 args = parser.parse_args()
 
 if args.password == None:
-	parser.print_help()
-	sys.exit()
-	
+        parser.print_help()
+        sys.exit()
+        
 message = {'id': 1, 'method': 'mining.add_litecoind', 'params': [args.password, args.lhost, args.lport, args.luser, args.lpassword]}
 
 try:
@@ -38,13 +38,13 @@ except IOError:
 
 for line in data.split("\n"):
     if not line.strip():
-    	# Skip last line which doesn't contain any message
+            # Skip last line which doesn't contain any message
         continue
 
     message = json.loads(line)
     if message['id'] == 1:
         if message['result'] == True:
-	        print "addlitecoind: done in %.03f sec" % (time.time() - start)
+                print "addlitecoind: done in %.03f sec" % (time.time() - start)
         else:
             print "addlitecoind: Error during request:", message['error'][1]
     else:

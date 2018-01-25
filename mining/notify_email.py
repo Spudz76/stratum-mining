@@ -29,15 +29,15 @@ class NOTIFY_EMAIL(object):
             self.send_email(settings.NOTIFY_ADMIN,subject,message)
 
     def notify_dead_miner(self,username,email):
-                    log.info("Attempting to send email to: %s" % username)
+                    log.info('Attempting to send email to: %s' % username)
                     subject = ('  Stratum ALERT:  ' + username + ' not authenticating properly!')
-		    text = (' Youre Miner is not authorising With Stratum correctly. please recheck youre worker details and retry')
+                    text = (' Your miner is not communicating with stratum correctly.  Please recheck worker details and retry')
                     message = MIMEText(text, 'html')
                     self.send_email(email,subject,message)
-                    log.info("Sent to %s" % email)
+                    log.info('Sent to %s' % email)
 
     def send_email(self,to,subject,message):
-        log.info("Send attempt to %s" % to)
+        log.info('Send attempt to %s' % to)
 
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject

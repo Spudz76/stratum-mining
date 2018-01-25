@@ -11,7 +11,7 @@ import MySQLdb
 
 class DB_Mysql(object):
     def __init__(self):
-        log.debug("Connecting to DB")
+        log.debug('Connecting to DB')
         
         required_settings = ['PASSWORD_SALT', 'DB_MYSQL_HOST', 
                              'DB_MYSQL_USER', 'DB_MYSQL_PASS', 
@@ -19,14 +19,14 @@ class DB_Mysql(object):
         
         for setting_name in required_settings:
             if not hasattr(settings, setting_name):
-                raise ValueError("%s isn't set, please set in config.py" % setting_name)
+                raise ValueError('%s isn\'t set, please set in config.py' % setting_name)
         
         self.salt = getattr(settings, 'PASSWORD_SALT')
         self.connect()
         
     def connect(self):
         self.dbpool = adbapi.ConnectionPool(
-            "MySQLdb",
+            'MySQLdb',
             getattr(settings, 'DB_MYSQL_HOST'),
             getattr(settings, 'DB_MYSQL_USER'),
             getattr(settings, 'DB_MYSQL_PASS'),
@@ -69,7 +69,7 @@ class DB_Mysql(object):
         # 9: invalid_reason, 
         # 10: share_diff
 
-        log.debug("Importing Shares")
+        log.debug('Importing Shares')
         checkin_times = {}
         total_shares = 0
         best_diff = 0
@@ -102,7 +102,7 @@ class DB_Mysql(object):
             LIMIT 1
             """,
             {
-                "solution": data[2]
+                'solution': data[2]
             }
         )
 
@@ -118,9 +118,9 @@ class DB_Mysql(object):
                 LIMIT 1
                 """,
                 {
-                    "result": data[5], 
-                    "solution": data[2],
-                    "id": shareid[0]
+                    'result': data[5],
+                    'solution': data[2],
+                    'id': shareid[0]
                 }
             )
         else:
@@ -136,13 +136,13 @@ class DB_Mysql(object):
                   %(lres)s, %(result)s, %(reason)s, %(solution)s))
                 """,
                 {
-                    "time": data[4],
-                    "host": data[6],
-                    "uname": data[0],
-                    "lres": data[5],
-                    "result": data[5],
-                    "reason": data[9],
-                    "solution": data[2]
+                    'time': data[4],
+                    'host': data[6],
+                    'uname': data[0],
+                    'lres': data[5],
+                    'result': data[5],
+                    'reason': data[9],
+                    'solution': data[2]
                 }
             )
 
@@ -165,7 +165,7 @@ class DB_Mysql(object):
                 
 
     def get_user_nb(self, id_or_username):
-        log.debug("Finding nb user with id or username of %s", id_or_username)
+        log.debug('Finding nb user with id or username of %s', id_or_username)
 
         user = self.fetchone_nb(
             """
@@ -175,14 +175,14 @@ class DB_Mysql(object):
               OR `username` = %(uname)s
             """,
             {
-                "id": id_or_username if id_or_username.isdigit() else -1,
-                "uname": id_or_username
+                'id': id_or_username if id_or_username.isdigit() else -1,
+                'uname': id_or_username
             }
         )
         return user
 
     def get_user(self, id_or_username):
-        log.debug("Finding user with id or username of %s", id_or_username)
+        log.debug('Finding user with id or username of %s', id_or_username)
 
         return self.fetchone_nb(
             """
@@ -192,16 +192,16 @@ class DB_Mysql(object):
               OR `username` = %(uname)s
             """,
             {
-                "id": id_or_username if id_or_username.isdigit() else -1,
-                "uname": id_or_username
+                'id': id_or_username if id_or_username.isdigit() else -1,
+                'uname': id_or_username
             }
         )
 
     @defer.inlineCallbacks
     def get_uid(self, id_or_username):
-        log.debug("Finding user id of %s", id_or_username)
-        uname = id_or_username.split(".", 1)[0]
-        row = yield self.fetchone_nb("SELECT `id` FROM `accounts` where username = %s", (uname))
+        log.debug('Finding user id of %s', id_or_username)
+        uname = id_or_username.split('.', 1)[0]
+        row = yield self.fetchone_nb('SELECT `id` FROM `accounts` where username = %s', (uname))
 
         if row is None:
             defer.returnValue(False)
@@ -210,8 +210,8 @@ class DB_Mysql(object):
             defer.returnValue(uid)
 
     def insert_worker(self, account_id, username, password):
-        log.debug("Adding new worker %s", username)
-        query = "INSERT INTO pool_worker"
+        log.debug('Adding new worker %s', username)
+        query = 'INSERT INTO pool_worker'
         self.execute_nb(query + '(account_id, username, password) VALUES (%s, %s, %s);', (account_id, username, password))
         return str(username)
         
@@ -220,7 +220,7 @@ class DB_Mysql(object):
         if id_or_username.isdigit() and id_or_username == '0':
             raise Exception('You cannot delete that user')
         
-        log.debug("Deleting user with id or username of %s", id_or_username)
+        log.debug('Deleting user with id or username of %s', id_or_username)
         
         self.execute_nb(
             """
@@ -229,8 +229,8 @@ class DB_Mysql(object):
             WHERE `username` = %(uname)s
             """,
             {
-                "id": id_or_username if id_or_username.isdigit() else -1,
-                "uname": id_or_username
+                'id': id_or_username if id_or_username.isdigit() else -1,
+                'uname': id_or_username
             }
         )
         
@@ -241,13 +241,13 @@ class DB_Mysql(object):
               OR `username` = %(uname)s
             """, 
             {
-                "id": id_or_username if id_or_username.isdigit() else -1,
-                "uname": id_or_username
+                'id': id_or_username if id_or_username.isdigit() else -1,
+                'uname': id_or_username
             }
         )
 
     def insert_user(self, username, password):
-        log.debug("Adding new user %s", username)
+        log.debug('Adding new user %s', username)
         
         self.execute_nb(
             """
@@ -257,14 +257,14 @@ class DB_Mysql(object):
             (%(uname)s, %(pass)s)
             """,
             {
-                "uname": username, 
-                "pass": password
+                'uname': username,
+                'pass': password
             }
         )
         return str(username)
 
     def update_user(self, id_or_username, password):
-        log.debug("Updating password for user %s", id_or_username);
+        log.debug('Updating password for user %s', id_or_username);
         
         self.execute_nb(
             """
@@ -274,15 +274,15 @@ class DB_Mysql(object):
               OR `username` = %(uname)s
             """,
             {
-                "id": id_or_username if id_or_username.isdigit() else -1,
-                "uname": id_or_username,
-                "pass": password
+                'id': id_or_username if id_or_username.isdigit() else -1,
+                'uname': id_or_username,
+                'pass': password
             }
         )
 
     @defer.inlineCallbacks
     def check_password(self, username, password):
-        log.debug("Checking username/password for %s", username)
+        log.debug('Checking username/password for %s', username)
         
         data = yield self.fetchone_nb(
             """
@@ -292,8 +292,8 @@ class DB_Mysql(object):
               AND `password` = %(pass)s
             """,
             {
-                "uname": username, 
-                "pass": password
+                'uname': username,
+                'pass': password
             }
         )
         
@@ -317,13 +317,13 @@ class DB_Mysql(object):
         
         for data in result:
             ret[data[0]] = {
-                "username": data[0],
-                "speed": int(data[1]),
-                "last_checkin": time.mktime(data[2].timetuple()),
-                "total_shares": int(data[3]),
-                "total_rejects": int(data[4]),
-                "total_found": int(data[5]),
-                "alive": True if data[6] is 1 else False,
+                'username': data[0],
+                'speed': int(data[1]),
+                'last_checkin': time.mktime(data[2].timetuple()),
+                'total_shares': int(data[3]),
+                'total_rejects': int(data[4]),
+                'total_found': int(data[5]),
+                'alive': True if data[6] is 1 else False,
             }
             
         defer.returnValue(ret)
@@ -333,7 +333,7 @@ class DB_Mysql(object):
 
     @defer.inlineCallbacks
     def check_tables(self):
-        log.debug("Checking Database")
+        log.debug('Checking Database')
         
         data = yield self.fetchone_nb(
             """
@@ -343,12 +343,9 @@ class DB_Mysql(object):
               AND `table_name` = 'shares'
             """,
             {
-                "schema": getattr(settings, 'DB_MYSQL_DBNAME')
+                'schema': getattr(settings, 'DB_MYSQL_DBNAME')
             }
         )
 
         if data[0] <= 0:
-            raise Exception("There is no shares table. Have you imported the schema?")
-
-
-
+            raise Exception('There is no shares table. Have you imported the schema?')

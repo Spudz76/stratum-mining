@@ -8,8 +8,8 @@ import pylibmc
 class Cache():
     def __init__(self):
         # Open a new connection
-        self.mc = pylibmc.Client([settings.MEMCACHE_HOST + ":" + str(settings.MEMCACHE_PORT)], binary=True)
-        log.info("Caching initialized")
+        self.mc = pylibmc.Client([settings.MEMCACHE_HOST + ':' + str(settings.MEMCACHE_PORT)], binary=True)
+        log.info('Caching initialized')
 
     def set(self, key, value, time=settings.MEMCACHE_TIMEOUT):
         return self.mc.set(settings.MEMCACHE_PREFIX + str(key), value, time)

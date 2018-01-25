@@ -71,5 +71,5 @@ Please research and attempt to debug first.
 * Multi Algo, Vardiff, DB and MPOS support done by Ahmed_Bodi, penner42 and Obigal
 
 # License
-This software is provides AS-IS without any warranties of any kind. Please use at your own risk. 
+This software is provided AS-IS without any warranties of any kind. Please use at your own risk. 
 

@@ -49,7 +49,7 @@ class WorkIdGenerator(object):
         cls.counter += 1
         if cls.counter % 0xffff == 0:
             cls.counter = 1
-        return "%x" % cls.counter
+        return '%x' % cls.counter
 
 class ShareLimiterInterface(object):
     '''Implement difficulty adjustments here'''
@@ -82,7 +82,7 @@ class ShareManagerInterface(object):
         pass
     
     def on_submit_share(self, worker_name, block_header, block_hash, difficulty, timestamp, is_valid, ip, invalid_reason, share_diff):
-        log.debug("%s (%s) %s %s" % (block_hash, share_diff, 'valid' if is_valid else 'INVALID', worker_name))
+        log.debug('%s (%s) %s %s' % (block_hash, share_diff, 'valid' if is_valid else 'INVALID', worker_name))
         dbi.queue_share([worker_name, block_header, block_hash, difficulty, timestamp, is_valid, ip, self.block_height, self.prev_hash,
                 invalid_reason, share_diff ])
  
@@ -91,7 +91,7 @@ class ShareManagerInterface(object):
         if (settings.SOLUTION_BLOCK_HASH):
             block_hash = valid_hash
 
-        log.info("Block %s %s" % (block_hash, 'ACCEPTED' if is_accepted else 'REJECTED'))
+        log.info('Block %s %s' % (block_hash, 'ACCEPTED' if is_accepted else 'REJECTED'))
         #dbi.run_import(dbi, Force=True)
         dbi.found_block([worker_name, block_header, block_hash, -1, timestamp, is_accepted, ip, self.block_height, self.prev_hash, share_diff ])
         
@@ -135,5 +135,5 @@ class Interfaces(object):
         
     @classmethod
     def set_template_registry(cls, registry):
-        dbi.set_bitcoinrpc(registry.bitcoin_rpc)
+        dbi.set_bitcoinrpc(registry.sia_rpc)
         cls.template_registry = registry

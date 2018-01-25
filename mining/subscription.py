@@ -36,11 +36,11 @@ class MiningSubscription(Subscription):
                     else:
                         subscription.emit_single(job_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, clean_jobs)
             except Exception as e:
-                log.exception("Error broadcasting work to client %s" % str(e))
+                log.exception('Error broadcasting work to client %s' % str(e))
                 pass
         
         cnt = Pubsub.get_subscription_count(cls.event)
-        log.info("BROADCASTED to %d connections in %.03f sec" % (cnt, (Interfaces.timestamper.time() - start)))
+        log.info('BROADCASTED to %d connections in %.03f sec' % (cnt, (Interfaces.timestamper.time() - start)))
         
     def _finish_after_subscribe(self, result):
         '''Send new job to newly subscribed client'''
@@ -48,7 +48,7 @@ class MiningSubscription(Subscription):
             (job_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, _) = \
                         Interfaces.template_registry.get_last_broadcast_args()
         except Exception:
-            log.error("Template not ready yet")
+            log.error('Template not ready yet')
             return result
         
         # Force set higher difficulty

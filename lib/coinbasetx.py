@@ -17,11 +17,11 @@ class CoinbaseTransaction(halfnode.CTransaction):
 
     def __init__(self, timestamper, coinbaser, value, flags, height, commitment = None, data='', ntime=None):
         super(CoinbaseTransaction, self).__init__()
-        log.debug("Got to CoinBaseTX")
+        log.debug('Got to CoinBaseTX')
         #self.extranonce = 0
         
         if len(self.extranonce_placeholder) != self.extranonce_size:
-            raise Exception("Extranonce placeholder don't match expected length!")
+            raise Exception('Extranonce placeholder don\'t match expected length!')
 
         tx_in = halfnode.CTxIn()
         tx_in.prevout.hash = 0L
@@ -42,7 +42,7 @@ class CoinbaseTransaction(halfnode.CTransaction):
            self.nTime = ntime
 
         if settings.COINDAEMON_TX != False:
-            self.strTxComment = "http://github.com/ahmedbodi/stratum-mining"
+            self.strTxComment = 'http://github.com/nullivex'
        
         self.vin.append(tx_in)
         self.vout.append(tx_out)

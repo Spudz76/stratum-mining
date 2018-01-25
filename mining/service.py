@@ -39,10 +39,10 @@ class MiningService(GenericService):
                     else:
                         pass
             except Exception as e:
-                log.exception("Error getting subscriptions %s" % str(e))
+                log.exception('Error getting subscriptions %s' % str(e))
                 pass
 
-        log.debug("Server stats request: %s" % serialized)
+        log.debug('Server stats request: %s' % serialized)
         return '%s' % serialized
 
     @admin
@@ -51,7 +51,7 @@ class MiningService(GenericService):
         instant notification about new block on the network.
         See blocknotify.sh in /scripts/ for more info.'''
         
-        log.info("New block notification received")
+        log.info('New block notification received')
         Interfaces.template_registry.update_block()
         return True 
 
@@ -59,11 +59,11 @@ class MiningService(GenericService):
     def add_litecoind(self, *args):
         ''' Function to add a litecoind instance live '''
         if len(args) != 4:
-            raise SubmitException("Incorrect number of parameters sent")
+            raise SubmitException('Incorrect number of parameters sent')
 
         #(host, port, user, password) = args
-        Interfaces.template_registry.bitcoin_rpc.add_connection(args[0], args[1], args[2], args[3])
-        log.info("New litecoind connection added %s:%s" % (args[0], args[1]))
+        Interfaces.template_registry.sia_rpc.add_connection(args[0], args[1], args[2], args[3])
+        log.info('New litecoind connection added %s:%s' % (args[0], args[1]))
         return True 
     
     def authorize(self, worker_name, worker_password):
@@ -85,7 +85,7 @@ class MiningService(GenericService):
             return True
         else:
             ip = self.connection_ref()._get_ip()
-            log.info("Failed worker authorization: IP %s", str(ip))
+            log.info('Failed worker authorization: IP %s', str(ip))
             if worker_name in session['authorized']:
                 del session['authorized'][worker_name]
             if worker_name in Interfaces.worker_manager.worker_log['authorized']:
@@ -114,15 +114,15 @@ class MiningService(GenericService):
         # Check if worker is authorized to submit shares
         ip = self.connection_ref()._get_ip()
         if not Interfaces.worker_manager.authorize(worker_name, session['authorized'].get(worker_name)):
-            log.info("Worker is not authorized: IP %s", str(ip))
-            raise SubmitException("Worker is not authorized")
+            log.info('Worker is not authorized: IP %s', str(ip))
+            raise SubmitException('Worker is not authorized')
 
         # Check if extranonce1 is in connection session
         extranonce1_bin = session.get('extranonce1', None)
         
         if not extranonce1_bin:
-            log.info("Connection is not subscribed for mining: IP %s", str(ip))
-            raise SubmitException("Connection is not subscribed for mining")
+            log.info('Connection is not subscribed for mining: IP %s', str(ip))
+            raise SubmitException('Connection is not subscribed for mining')
         
         # Get current block job_id
         difficulty = session['difficulty']
@@ -132,7 +132,7 @@ class MiningService(GenericService):
             job_ts = Interfaces.timestamper.time()
             Interfaces.worker_manager.job_log.setdefault(worker_name, {})[work_id] = (work_id, difficulty, job_ts)
             job_id = work_id
-        #log.debug("worker_job_log: %s" % repr(Interfaces.worker_manager.job_log))
+        #log.debug('worker_job_log: %s' % repr(Interfaces.worker_manager.job_log))
 
         submit_time = Interfaces.timestamper.time()
 
@@ -141,21 +141,21 @@ class MiningService(GenericService):
 
         if is_banned and submit_time - last_ts > settings.WORKER_BAN_TIME:
             if percent > settings.INVALID_SHARES_PERCENT:
-                log.debug("Worker invalid percent: %0.2f %s STILL BANNED!" % (percent, worker_name))
+                log.debug('Worker invalid percent: %0.2f %s STILL BANNED!' % (percent, worker_name))
             else: 
                 is_banned = False
-                log.debug("Clearing ban for worker: %s UNBANNED" % worker_name)
+                log.debug('Clearing ban for worker: %s UNBANNED' % worker_name)
             (valid, invalid, is_banned, last_ts) = (0, 0, is_banned, Interfaces.timestamper.time())
 
         if submit_time - last_ts > settings.WORKER_CACHE_TIME and not is_banned:
             if percent > settings.INVALID_SHARES_PERCENT and settings.ENABLE_WORKER_BANNING:
                 is_banned = True
-                log.debug("Worker invalid percent: %0.2f %s BANNED!" % (percent, worker_name))
+                log.debug('Worker invalid percent: %0.2f %s BANNED!' % (percent, worker_name))
             else:
-                log.debug("Clearing worker stats for: %s" % worker_name)
+                log.debug('Clearing worker stats for: %s' % worker_name)
             (valid, invalid, is_banned, last_ts) = (0, 0, is_banned, Interfaces.timestamper.time())
 
-        log.debug("%s (%d, %d, %s, %s, %d) %0.2f%% work_id(%s) job_id(%s) diff(%f)" % (worker_name, valid, invalid, is_banned, is_ext_diff, last_ts, percent, work_id, job_id, difficulty))
+        log.debug('%s (%d, %d, %s, %s, %d) %0.2f%% work_id(%s) job_id(%s) diff(%f)' % (worker_name, valid, invalid, is_banned, is_ext_diff, last_ts, percent, work_id, job_id, difficulty))
         if not is_ext_diff:    
             Interfaces.share_limiter.submit(self.connection_ref, job_id, difficulty, submit_time, worker_name)
             
@@ -170,7 +170,7 @@ class MiningService(GenericService):
             Interfaces.worker_manager.worker_log['authorized'][worker_name] = (valid, invalid, is_banned, difficulty, is_ext_diff, last_ts)
 
             if is_banned:
-                raise SubmitException("Worker is temporarily banned")
+                raise SubmitException('Worker is temporarily banned')
  
             Interfaces.share_manager.on_submit_share(worker_name, False, False, difficulty,
                 submit_time, False, ip, e[0], 0)   
@@ -180,7 +180,7 @@ class MiningService(GenericService):
         Interfaces.worker_manager.worker_log['authorized'][worker_name] = (valid, invalid, is_banned, difficulty, is_ext_diff, last_ts)
 
         if is_banned:
-            raise SubmitException("Worker is temporarily banned")
+            raise SubmitException('Worker is temporarily banned')
  
         Interfaces.share_manager.on_submit_share(worker_name, block_header,
             block_hash, difficulty, submit_time, True, ip, '', share_diff)
@@ -194,19 +194,19 @@ class MiningService(GenericService):
         return True
             
     # Service documentation for remote discovery
-    update_block.help_text = "Notify Stratum server about new block on the network."
+    update_block.help_text = 'Notify Stratum server about new block on the network.'
     update_block.params = [('password', 'string', 'Administrator password'), ]
     
-    authorize.help_text = "Authorize worker for submitting shares on this connection."
+    authorize.help_text = 'Authorize worker for submitting shares on this connection.'
     authorize.params = [('worker_name', 'string', 'Name of the worker, usually in the form of user_login.worker_id.'),
                         ('worker_password', 'string', 'Worker password'), ]
     
-    subscribe.help_text = "Subscribes current connection for receiving new mining jobs."
+    subscribe.help_text = 'Subscribes current connection for receiving new mining jobs.'
     subscribe.params = []
     
-    submit.help_text = "Submit solved share back to the server. Excessive sending of invalid shares "\
-                       "or shares above indicated target (see Stratum mining docs for set_target()) may lead "\
-                       "to temporary or permanent ban of user,worker or IP address."
+    submit.help_text = 'Submit solved share back to the server. Excessive sending of invalid shares ' \
+                       'or shares above indicated target (see Stratum mining docs for set_target()) may lead ' \
+                       'to temporary or permanent ban of user,worker or IP address.'
     submit.params = [('worker_name', 'string', 'Name of the worker, usually in the form of user_login.worker_id.'),
                      ('job_id', 'string', 'ID of job (received by mining.notify) which the current solution is based on.'),
                      ('extranonce2', 'string', 'hex-encoded big-endian extranonce2, length depends on extranonce2_size from mining.notify.'),

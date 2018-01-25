@@ -42,7 +42,7 @@ THREAD_POOL_SIZE = 300
 # NOT IMPLEMENTED YET
 #RPC_TIMEOUT_PROCESS = 30
 
-# Do you want to expose "example" service in server?
+# Do you want to expose 'example' service in server?
 # Useful for learning the server,you probably want to disable
 # Disable the example service
 ENABLE_EXAMPLE_SERVICE = False
@@ -94,7 +94,7 @@ BROWSER_ENABLE = True
 
 # ******************** *COIND SETTINGS ************
 
-# Hostname and credentials for one trusted Bitcoin node ("Satoshi's client").
+# Hostname and credentials for one trusted Sia node (Satoshi's client).
 # Stratum uses both P2P port (which is 8333 everytime) and RPC port
 COINDAEMON_TRUSTED_HOST = '127.0.0.1'
 COINDAEMON_TRUSTED_PORT = 8332 # RPC port
@@ -140,8 +140,8 @@ SIGNING_ID = None
 
 # *********************** IRC / PEER CONFIGURATION *************
 
-IRC_NICK =  "stratum%s" # Skip IRC registration
-#IRC_NICK = "stratum" # Use nickname of your choice
+IRC_NICK = 'stratum%s'  # Skip IRC registration
+#IRC_NICK = 'stratum' # Use nickname of your choice
 
 # Which hostname / external IP expose in IRC room
 # This should be official HOSTNAME for normal operation.

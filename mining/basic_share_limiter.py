@@ -40,7 +40,7 @@ class SpeedBuffer:
 
 class SpeedBufferFull:
     def __init__(self, n):
-        raise "you should use SpeedBuffer"
+        raise 'you should use SpeedBuffer'
            
     def append(self, x):                
         self.data[self.cur] = x
@@ -79,8 +79,8 @@ class BasicShareLimiter(object):
         # Update the difficulty  if it is out of date or not set
         if 'timestamp' not in self.litecoin or self.litecoin['timestamp'] < int(time.time()) - settings.DIFF_UPDATE_FREQUENCY:
             self.litecoin['timestamp'] = time.time()
-            self.litecoin['difficulty'] = (yield Interfaces.template_registry.bitcoin_rpc.getdifficulty())
-            log.debug("Updated litecoin difficulty to %s" %  (self.litecoin['difficulty']))
+            self.litecoin['difficulty'] = (yield Interfaces.template_registry.sia_rpc.getdifficulty())
+            log.debug('Updated litecoin difficulty to %s' % (self.litecoin['difficulty']))
         self.litecoin_diff = self.litecoin['difficulty']
 
     def submit(self, connection_ref, job_id, current_difficulty, timestamp, worker_name):
@@ -103,11 +103,11 @@ class BasicShareLimiter(object):
         # Set up and log our check
         self.worker_stats[worker_name]['last_rtc'] = ts
         avg = self.worker_stats[worker_name]['buffer'].avg()
-        log.debug("Checking Retarget for %s (%i) avg. %i target %i+-%i" % (worker_name, current_difficulty, avg,
-                self.target, self.variance))
+        log.debug('Checking Retarget for %s (%i) avg. %i target %i+-%i' % (worker_name, current_difficulty, avg,
+                                                                           self.target, self.variance))
         
         if avg < 1:
-            log.warning("Reseting avg = 1 since it's SOOO low")
+            log.warning('Reseting avg = 1 since it\'s SOOO low')
             avg = 1
 
         # Figure out our Delta-Diff
@@ -163,7 +163,7 @@ class BasicShareLimiter(object):
             new_diff = current_difficulty * ddiff
         else:
             new_diff = current_difficulty + ddiff
-        log.debug("Retarget for %s %i old: %i new: %i" % (worker_name, ddiff, current_difficulty, new_diff))
+        log.debug('Retarget for %s %i old: %i new: %i' % (worker_name, ddiff, current_difficulty, new_diff))
 
         self.worker_stats[worker_name]['buffer'].clear()
         session = connection_ref().get_session()
@@ -174,8 +174,7 @@ class BasicShareLimiter(object):
         
         session['difficulty'] = new_diff
         connection_ref().rpc('mining.set_difficulty', [new_diff, ], is_notification=True)
-        log.debug("Notified of New Difficulty")
+        log.debug('Notified of New Difficulty')
         connection_ref().rpc('mining.notify', [work_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, False, ], is_notification=True)
-        log.debug("Sent new work")
+        log.debug('Sent new work')
         dbi.update_worker_diff(worker_name, new_diff)
-

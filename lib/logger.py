@@ -33,14 +33,14 @@ def get_logger(name):
     if settings.LOGFILE != None:
         logger.addHandler(file_handler)
     
-    logger.debug("Logging initialized")
+    logger.debug('Logging initialized')
     return logger
     #return Logger()
 
 if settings.DEBUG:
-    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s %(module)s.%(funcName)s # %(message)s")
+    fmt = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(module)s.%(funcName)s # %(message)s')
 else:
-    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s # %(message)s")
+    fmt = logging.Formatter('%(asctime)s %(levelname)s %(name)s # %(message)s')
     
 if settings.LOGFILE != None:
     # Create the log folder if it does not exist

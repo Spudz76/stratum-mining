@@ -22,34 +22,34 @@ def setup(on_startup):
     import lib.logger
     log = lib.logger.get_logger('mining')
     if settings.CONFIG_VERSION == None:
-	settings.CONFIG_VERSION = 0
+        settings.CONFIG_VERSION = 0
     else: pass
     from interfaces import Interfaces
     
     from lib.block_updater import BlockUpdater
     from lib.template_registry import TemplateRegistry
-    from lib.bitcoin_rpc_manager import BitcoinRPCManager
+    from lib.sia_rpc_manager import SiaRPCManager
     from lib.block_template import BlockTemplate
     from lib.coinbaser import SimpleCoinbaser
     
-    bitcoin_rpc = BitcoinRPCManager()
+    sia_rpc = SiaRPCManager()
     # Check litecoind
     #         Check we can connect (sleep)
     # Check the results:
     #         - getblocktemplate is avalible        (Die if not)
     #         - we are not still downloading the blockchain        (Sleep)
-    log.info("Connecting to litecoind...")
+    log.info('Connecting to litecoind...')
     while True:
         try:
-            result = (yield bitcoin_rpc.check_submitblock())
-	    if result == True:
-                log.info("Found submitblock")
+            result = (yield sia_rpc.check_submitblock())
+            if result == True:
+                log.info('Found submitblock')
             elif result == False:
-                log.info("Did not find submitblock")
+                log.info('Did not find submitblock')
             else:
-                log.info("unknown submitblock result")
+                log.info('unknown submitblock result')
         except ConnectionRefusedError, e:
-            log.error("Connection refused while trying to connect to the coind (are your COIND_* settings correct?)")
+            log.error('Connection refused while trying to connect to the coind (are your COIND_* settings correct?)')
             reactor.stop()
             break
 
@@ -57,26 +57,26 @@ def setup(on_startup):
             log.debug(str(e))
 
         try:
-            result = (yield bitcoin_rpc.getblocktemplate())
+            result = (yield sia_rpc.getblocktemplate())
             if isinstance(result, dict):
                 # litecoind implements version 1 of getblocktemplate
                 if result['version'] >= 1:
-                    result = (yield bitcoin_rpc.getdifficulty())
+                    result = (yield sia_rpc.getdifficulty())
                     if isinstance(result,dict):
                         if 'proof-of-stake' in result: 
                             settings.COINDAEMON_REWARD = 'POS'
-                            log.info("Coin detected as POS")
+                            log.info('Coin detected as POS')
                             break
                     else:
                         settings.COINDAEMON_REWARD = 'POW'
-                        log.info("Coin detected as POW")
+                        log.info('Coin detected as POW')
                         break
                 else:
-                    log.error("Block Version mismatch: %s" % result['version'])
+                    log.error('Block Version mismatch: %s' % result['version'])
 
 
         except ConnectionRefusedError, e:
-            log.error("Connection refused while trying to connect to the coind (are your COIND_* settings correct?)")
+            log.error('Connection refused while trying to connect to the coind (are your COIND_* settings correct?)')
             reactor.stop()
             break
 
@@ -85,27 +85,27 @@ def setup(on_startup):
                 try:
                     if isinstance(json.loads(e[2])['error']['message'], str):
                         error = json.loads(e[2])['error']['message']
-                    if error == "Method not found":
-                        log.error("CoinD does not support getblocktemplate!!! (time to upgrade.)")
+                    if error == 'Method not found':
+                        log.error('CoinD does not support getblocktemplate!!! (time to upgrade.)')
                         reactor.stop()
-                    elif "downloading blocks" in error:
-                        log.error("CoinD downloading blockchain... will check back in 30 sec")
+                    elif 'downloading blocks' in error:
+                        log.error('CoinD downloading blockchain... will check back in 30 sec')
                         time.sleep(29)
                     else:
-                        log.error("Coind Error: %s", error)
+                        log.error('Coind Error: %s', error)
                 except ValueError:
-                    log.error("Failed Connect(HTTP 500 or Invalid JSON), Check Username and Password!")
+                    log.error('Failed Connect(HTTP 500 or Invalid JSON), Check Username and Password!')
                     reactor.stop()
         time.sleep(1)  # If we didn't get a result or the connect failed
         
     log.info('Connected to the coind - Begining to load Address and Module Checks!')
     # Start the coinbaser
-    coinbaser = SimpleCoinbaser(bitcoin_rpc, getattr(settings, 'CENTRAL_WALLET'))
+    coinbaser = SimpleCoinbaser(sia_rpc, getattr(settings, 'CENTRAL_WALLET'))
     (yield coinbaser.on_load)
     
     registry = TemplateRegistry(BlockTemplate,
                                 coinbaser,
-                                bitcoin_rpc,
+                                sia_rpc,
                                 getattr(settings, 'INSTANCE_ID'),
                                 MiningSubscription.on_template,
                                 Interfaces.share_manager.on_network_block)
@@ -117,13 +117,13 @@ def setup(on_startup):
     # Set up polling mechanism for detecting new block on the network
     # This is just failsafe solution when -blocknotify
     # mechanism is not working properly    
-    BlockUpdater(registry, bitcoin_rpc)
+    BlockUpdater(registry, sia_rpc)
 
     prune_thr = threading.Thread(target=WorkLogPruner, args=(Interfaces.worker_manager.job_log,))
     prune_thr.daemon = True
     prune_thr.start()
     
-    log.info("MINING SERVICE IS READY")
+    log.info('MINING SERVICE IS READY')
     on_startup.callback(True)
 
 

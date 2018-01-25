@@ -1,18 +1,18 @@
 import struct
 import lib.logger
-log = lib.logger.get_logger('extronance')
+log = lib.logger.get_logger('extranonce')
 
 class ExtranonceCounter(object):
     '''Implementation of a counter producing
        unique extranonce across all pool instances.
-       This is just dumb "quick&dirty" solution,
+       This is just dumb 'quick&dirty' solution,
        but it can be changed at any time without breaking anything.'''       
 
     def __init__(self, instance_id):
-        log.debug("Got to Extronance Counter")
+        log.debug('Got to Extranonce Counter')
         if instance_id < 0 or instance_id > 31:
-            raise Exception("Current ExtranonceCounter implementation needs an instance_id in <0, 31>.")
-        log.debug("Got To Extronance")
+            raise Exception('Current ExtranonceCounter implementation needs an instance_id in <0, 31>.')
+        log.debug('Got To Extranonce')
 
         # Last 5 most-significant bits represents instance_id
         # The rest is just an iterator of jobs.
@@ -26,4 +26,3 @@ class ExtranonceCounter(object):
     def get_new_bin(self):
         self.counter += 1
         return struct.pack('>L', self.counter)
-        

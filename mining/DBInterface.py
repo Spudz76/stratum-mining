@@ -32,7 +32,7 @@ class DBInterface():
         signal.signal(signal.SIGINT, self.signal_handler)
 
     def signal_handler(self, signal, frame):
-        log.warning("SIGINT Detected, shutting down")
+        log.warning('SIGINT Detected, shutting down')
         self.do_import(self.dbi, True)
         reactor.stop()
 
@@ -40,24 +40,24 @@ class DBInterface():
         self.bitcoinrpc = bitcoinrpc
 
     def connectDB(self):
-        if settings.DATABASE_DRIVER == "sqlite":
+        if settings.DATABASE_DRIVER == 'sqlite':
             log.debug('DB_Sqlite INIT')
             import DB_Sqlite
             return DB_Sqlite.DB_Sqlite()
-        elif settings.DATABASE_DRIVER == "mysql":
+        elif settings.DATABASE_DRIVER == 'mysql':
              if settings.VARIABLE_DIFF:
-                log.debug("DB_Mysql_Vardiff INIT")
+                log.debug('DB_Mysql_Vardiff INIT')
                 import DB_Mysql_Vardiff
                 return DB_Mysql_Vardiff.DB_Mysql_Vardiff()
              else:  
                 log.debug('DB_Mysql INIT')
                 import DB_Mysql
                 return DB_Mysql.DB_Mysql()
-        elif settings.DATABASE_DRIVER == "postgresql":
+        elif settings.DATABASE_DRIVER == 'postgresql':
             log.debug('DB_Postgresql INIT')
             import DB_Postgresql
             return DB_Postgresql.DB_Postgresql()
-        elif settings.DATABASE_DRIVER == "none":
+        elif settings.DATABASE_DRIVER == 'none':
             log.debug('DB_None INIT')
             import DB_None
             return DB_None.DB_None()
@@ -69,7 +69,7 @@ class DBInterface():
 
     def scheduleImport(self):
         # This schedule's the Import
-        if settings.DATABASE_DRIVER == 'mysql'  or settings.DATABASE_DRIVER == "sqlite":
+        if settings.DATABASE_DRIVER == 'mysql'  or settings.DATABASE_DRIVER == 'sqlite':
             use_thread = False
         else:
             use_thread = True
@@ -80,7 +80,7 @@ class DBInterface():
             self.queueclock = reactor.callLater(settings.DB_LOADER_CHECKTIME , self.run_import)
     
     def run_import_thread(self):
-        log.debug("run_import_thread current size: %d", self.q.qsize())
+        log.debug('run_import_thread current size: %d', self.q.qsize())
         
         if self.q.qsize() >= settings.DB_LOADER_REC_MIN or time.time() >= self.next_force_import_time:  # Don't incur thread overhead if we're not going to run
             reactor.callInThread(self.import_thread)
@@ -88,14 +88,14 @@ class DBInterface():
         self.scheduleImport()
 
     def run_import(self):
-        log.debug("DBInterface.run_import called")
+        log.debug('DBInterface.run_import called')
         
         self.do_import(self.dbi, False)
         
         self.scheduleImport()
         
     def run_import_force(self):
-        log.debug("DBInterface.run_import called")
+        log.debug('DBInterface.run_import called')
         
         self.do_import(self.dbi, True)
         
@@ -112,7 +112,7 @@ class DBInterface():
             'connections' : data['connections'], 'difficulty' : data['difficulty'] })
 
     def do_import(self, dbi, force):
-        log.debug("DBInterface.do_import called. force: %s, queue size: %s", 'yes' if force == True else 'no', self.q.qsize())
+        log.debug('DBInterface.do_import called. force: %s, queue size: %s', 'yes' if force == True else 'no', self.q.qsize())
         
         # Flush the whole queue on force
         forcesize = 0
@@ -138,10 +138,10 @@ class DBInterface():
                 
             # try to do the import, if we fail, log the error and put the data back in the queue
             try:
-                log.info("Inserting %s Share Records", datacnt)
+                log.info('Inserting %s Share Records', datacnt)
                 dbi.import_shares(sqldata)
             except Exception as e:
-                log.error("Insert Share Records Failed: %s", e.args[0])
+                log.error('Insert Share Records Failed: %s', e.args[0])
                 for k, v in enumerate(sqldata):
                     self.q.put(v)
                 break  # Allows us to sleep a little
@@ -151,23 +151,23 @@ class DBInterface():
 
     def found_block(self, data):
         try:
-            log.info("Updating Found Block Share Record")
+            log.info('Updating Found Block Share Record')
             self.do_import(self.dbi, True)  # We can't Update if the record is not there.
             self.dbi.found_block(data)
         except Exception as e:
-            log.error("Update Found Block Share Record Failed: %s", e.args[0])
+            log.error('Update Found Block Share Record Failed: %s', e.args[0])
 
     @defer.inlineCallbacks
     def check_password(self, username, password):
-        if username == "":
-            log.info("Rejected worker for blank username")
+        if username == '':
+            log.info('Rejected worker for blank username')
             defer.returnValue(False)
         allowed_chars = Set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-.')
         if Set(username).issubset(allowed_chars) != True:
-            log.info("Username contains bad arguments")
+            log.info('Username contains bad arguments')
             defer.returnValue(False)
         if username.count('.') > 1:
-            log.info("Username contains multiple . ")
+            log.info('Username contains multiple . ')
             defer.returnValue(False)
         
         # Force username and password to be strings
@@ -187,7 +187,7 @@ class DBInterface():
                 self.cache.set(username, password)
                 defer.returnValue(True)
         
-        log.info("Authentication for %s failed" % username)
+        log.info('Authentication for %s failed' % username)
         defer.returnValue(False)
     
     def list_users(self):
@@ -195,18 +195,18 @@ class DBInterface():
     
     @defer.inlineCallbacks
     def get_user(self, id):
-        log.debug("get_user %s" % id)
+        log.debug('get_user %s' % id)
         if self.cache.get(id) is None:
-            log.debug("%s not in cache" % id)
+            log.debug('%s not in cache' % id)
             user = yield defer.maybeDeferred(self.dbi.get_user, id)
             ret = self.cache.set(id, user)
-            log.debug("cache set return: %s" % ret)
+            log.debug('cache set return: %s' % ret)
         defer.returnValue(self.cache.get(id))
 
 
     @defer.inlineCallbacks
     def user_exists(self, username):
-        log.debug("user_exists looking for %s" % username)
+        log.debug('user_exists looking for %s' % username)
         if self.cache.get(username) is not None:
             defer.returnValue(True)
         user = yield self.get_user(username)

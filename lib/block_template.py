@@ -33,8 +33,7 @@ class BlockTemplate(halfnode.CBlock):
     coinbase_transaction_class = CoinbaseTransaction
     
     def __init__(self, timestamper, coinbaser, job_id):
-        log.debug("Got To  Block_template.py")
-        log.debug("Got To Block_template.py")
+        log.debug('Got To Block_template.py')
         super(BlockTemplate, self).__init__()
         
         self.job_id = job_id 
@@ -74,12 +73,12 @@ class BlockTemplate(halfnode.CBlock):
 
             wmt = merkletree.MerkleTree(hashes).withFirst(binascii.unhexlify('0000000000000000000000000000000000000000000000000000000000000000'))
             self.witness = SHA256.new(SHA256.new(wmt + witness_nonce).digest()).digest()
-            commitment = b'\x6a' + struct.pack(">b", len(self.witness) + len(witness_magic)) + witness_magic + self.witness
+            commitment = b'\x6a' + struct.pack('>b', len(self.witness) + len(witness_magic)) + witness_magic + self.witness
             try:
                 default_witness = data['default_witness_commitment']
                 commitment_check = binascii.unhexlify(default_witness)
                 if(commitment != commitment_check):
-                    print("calculated witness does not match supplied one! This block probably will not be accepted!")
+                    print('calculated witness does not match supplied one! This block probably will not be accepted!')
                     commitment = commitment_check
             except KeyError:
                  pass
@@ -113,7 +112,7 @@ class BlockTemplate(halfnode.CBlock):
         
         # Reversed prevhash
         self.prevhash_bin = binascii.unhexlify(util.reverse_hash(data['previousblockhash']))
-        self.prevhash_hex = "%064x" % self.hashPrevBlock
+        self.prevhash_hex = '%064x' % self.hashPrevBlock
         
         self.broadcast_args = self.build_broadcast_args()
                 
@@ -136,9 +135,9 @@ class BlockTemplate(halfnode.CBlock):
         prevhash = binascii.hexlify(self.prevhash_bin)
         (coinb1, coinb2) = [ binascii.hexlify(x) for x in self.vtx[0]._serialized ]
         merkle_branch = [ binascii.hexlify(x) for x in self.merkletree._steps ]
-        version = binascii.hexlify(struct.pack(">i", self.nVersion))
-        nbits = binascii.hexlify(struct.pack(">I", self.nBits))
-        ntime = binascii.hexlify(struct.pack(">I", self.curtime))
+        version = binascii.hexlify(struct.pack('>i', self.nVersion))
+        nbits = binascii.hexlify(struct.pack('>I', self.nBits))
+        ntime = binascii.hexlify(struct.pack('>I', self.curtime))
         clean_jobs = True
         
         return (job_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, clean_jobs)
@@ -163,11 +162,11 @@ class BlockTemplate(halfnode.CBlock):
 
     def serialize_header(self, merkle_root_int, ntime_bin, nonce_bin):
         '''Serialize header for calculating block hash'''
-        r  = struct.pack(">i", self.nVersion)
+        r  = struct.pack('>i', self.nVersion)
         r += self.prevhash_bin
         r += util.ser_uint256_be(merkle_root_int)
         r += ntime_bin
-        r += struct.pack(">I", self.nBits)
+        r += struct.pack('>I', self.nBits)
         r += nonce_bin    
         return r       
 
@@ -184,12 +183,12 @@ class BlockTemplate(halfnode.CBlock):
 
     def serialize(self):
         r = []
-        r.append(struct.pack("<i", self.nVersion))
+        r.append(struct.pack('<i', self.nVersion))
         r.append(util.ser_uint256(self.hashPrevBlock))
         r.append(util.ser_uint256(self.hashMerkleRoot))
-        r.append(struct.pack("<I", self.nTime))
-        r.append(struct.pack("<I", self.nBits))
-        r.append(struct.pack("<I", self.nNonce))
+        r.append(struct.pack('<I', self.nTime))
+        r.append(struct.pack('<I', self.nBits))
+        r.append(struct.pack('<I', self.nNonce))
         r.append(util.ser_vector(self.vtx))
         return ''.join(r)
 

@@ -1,4 +1,4 @@
-# Eloipool - Python Bitcoin pool server
+# Eloipool - Python Sia pool server
 # Copyright (C) 2011-2012  Luke Dashjr <luke-jr+eloipool@utopios.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -93,7 +93,7 @@ def _test():
     for x in range(100):
         y = int('d43b669fb42cfa84695b844c0402d410213faa4f3e66cb7248f688ff19d5e5f7', 16)
         #y += x
-        coinbasehash = binascii.unhexlify("%x" % y)
+        coinbasehash = binascii.unhexlify('%x' % y)
         x = binascii.b2a_hex(mt.withFirst(coinbasehash))
 
     print x

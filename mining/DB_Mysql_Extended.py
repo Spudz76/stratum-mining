@@ -12,7 +12,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
         DB_Mysql.DB_Mysql.__init__(self)
 
     def updateStats(self, averageOverTime):
-        log.debug("Updating Stats")
+        log.debug('Updating Stats')
         # Note: we are using transactions... so we can set the speed = 0 and it doesn't take affect until we are commited.
         self.execute(
             """
@@ -39,8 +39,8 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             WHERE pw.`id` = leJoin.`worker`
             """,
             {
-                "time": stime,
-                "average": int(averageOverTime) * 1000000
+                'time': stime,
+                'average': int(averageOverTime) * 1000000
             }
         )
             
@@ -91,7 +91,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
               AND `time` <= FROM_UNIXTIME(%(time)s)
             """,
             {
-                "time": found_time
+                'time': found_time
             }
         )
         
@@ -110,7 +110,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             WHERE `time` <= FROM_UNIXTIME(%(time)s)
             """,
             {
-                "time": found_time
+                'time': found_time
             }
         )
         
@@ -123,7 +123,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             WHERE `time` <= FROM_UNIXTIME(%(time)s)
             """,
             {
-                "time": found_time
+                'time': found_time
             }
         )
         
@@ -137,7 +137,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             WHERE `time` <= FROM_UNIXTIME(%(time)s)
             """,
             {
-                "time": found_time
+                'time': found_time
             }
         )
         
@@ -157,7 +157,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
         # 9: invalid_reason, 
         # 10: share_diff
 
-        log.debug("Importing Shares")
+        log.debug('Importing Shares')
         checkin_times = {}
         total_shares = 0
         best_diff = 0
@@ -167,18 +167,18 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             
             if v[0] in checkin_times:
                 if v[4] > checkin_times[v[0]]:
-                    checkin_times[v[0]]["time"] = v[4]
+                    checkin_times[v[0]]['time'] = v[4]
             else:
                 checkin_times[v[0]] = {
-                    "time": v[4], 
-                    "shares": 0, 
-                    "rejects": 0
+                    'time': v[4],
+                    'shares': 0,
+                    'rejects': 0
                 }
 
             if v[5] == True:
-                checkin_times[v[0]]["shares"] += v[3]
+                checkin_times[v[0]]['shares'] += v[3]
             else:
-                checkin_times[v[0]]["rejects"] += v[3]
+                checkin_times[v[0]]['rejects'] += v[3]
 
             if v[10] > best_diff:
                 best_diff = v[10]
@@ -196,15 +196,15 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
                   %(blocknum)s, %(hash)s, '', %(difficulty)s)
                 """,
                 {
-                    "time": v[4],
-                    "host": v[6],
-                    "uname": v[0],
-                    "lres": v[5],
-                    "reason": v[9],
-                    "solution": v[2],
-                    "blocknum": v[7],
-                    "hash": v[8],
-                    "difficulty": v[3]
+                    'time': v[4],
+                    'host': v[6],
+                    'uname': v[0],
+                    'lres': v[5],
+                    'reason': v[9],
+                    'solution': v[2],
+                    'blocknum': v[7],
+                    'hash': v[8],
+                    'difficulty': v[3]
                 }
             )
 
@@ -230,19 +230,19 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             
         updates = [
             {
-                "param": "round_shares",
-                "value": round_shares
+                'param': 'round_shares',
+                'value': round_shares
             },
             {
-                "param": "round_progress",
-                "value": 0 if difficulty == 0 else (round_shares / difficulty) * 100
+                'param': 'round_progress',
+                'value': 0 if difficulty == 0 else (round_shares / difficulty) * 100
             }
         ]
             
         if best_diff > round_best_share:
             updates.append({
-                "param": "round_best_share",
-                "value": best_diff
+                'param': 'round_best_share',
+                'value': best_diff
             })
         
         self.executemany(
@@ -264,10 +264,10 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
                 WHERE `username` = %(uname)s
                 """,
                 {
-                    "time": v["time"],
-                    "shares": v["shares"],
-                    "rejects": v["rejects"], 
-                    "uname": k
+                    'time': v['time'],
+                    'shares': v['shares'],
+                    'rejects': v['rejects'],
+                    'uname': k
                 }
             )
         
@@ -293,10 +293,10 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             LIMIT 1
             """,
             {
-                "result": data[5], 
-                "solution": data[2], 
-                "time": data[4], 
-                "uname": data[0]
+                'result': data[5],
+                'solution': data[2],
+                'time': data[4],
+                'uname': data[0]
             }
         )
         
@@ -308,7 +308,7 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
                 WHERE `username` = %(uname)s
                 """,
                 {
-                    "uname": data[0]
+                    'uname': data[0]
                 }
             )
             self.execute(
@@ -328,24 +328,24 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
                 """,
                 [
                     {
-                        "param": "round_shares",
-                        "value": "0"
+                        'param': 'round_shares',
+                        'value': '0'
                     },
                     {
-                        "param": "round_progress",
-                        "value": "0"
+                        'param': 'round_progress',
+                        'value': '0'
                     },
                     {
-                        "param": "round_best_share",
-                        "value": "0"
+                        'param': 'round_best_share',
+                        'value': '0'
                     },
                     {
-                        "param": "round_start",
-                        "value": time.time()
+                        'param': 'round_start',
+                        'value': time.time()
                     },
                     {
-                        "param": "pool_total_found",
-                        "value": total_found
+                        'param': 'pool_total_found',
+                        'value': total_found
                     }
                 ]
             )
@@ -361,24 +361,24 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
             """,
             [
                 {
-                    "param": "bitcoin_blocks",
-                    "value": pi['blocks']
+                    'param': 'bitcoin_blocks',
+                    'value': pi['blocks']
                 },
                 {
-                    "param": "bitcoin_balance",
-                    "value": pi['balance']
+                    'param': 'bitcoin_balance',
+                    'value': pi['balance']
                 },
                 {
-                    "param": "bitcoin_connections",
-                    "value": pi['connections']
+                    'param': 'bitcoin_connections',
+                    'value': pi['connections']
                 },
                 {
-                    "param": "bitcoin_difficulty",
-                    "value": pi['difficulty']
+                    'param': 'bitcoin_difficulty',
+                    'value': pi['difficulty']
                 },
                 {
-                    "param": "bitcoin_infotime",
-                    "value": time.time()
+                    'param': 'bitcoin_infotime',
+                    'value': time.time()
                 }
             ]
         )
@@ -413,14 +413,14 @@ class DB_Mysql_Extended(DB_Mysql.DB_Mysql):
         
         for data in self.dbc.fetchall():
             ret[data[0]] = {
-                "username": data[0],
-                "speed": int(data[1]),
-                "last_checkin": time.mktime(data[2].timetuple()),
-                "total_shares": int(data[3]),
-                "total_rejects": int(data[4]),
-                "total_found": int(data[5]),
-                "alive": True if data[6] is 1 else False,
-                "difficulty": int(data[7])
+                'username': data[0],
+                'speed': int(data[1]),
+                'last_checkin': time.mktime(data[2].timetuple()),
+                'total_shares': int(data[3]),
+                'total_rejects': int(data[4]),
+                'total_found': int(data[5]),
+                'alive': True if data[6] is 1 else False,
+                'difficulty': int(data[7])
             }
             
         return ret

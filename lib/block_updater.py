@@ -16,17 +16,17 @@ class BlockUpdater(object):
         with ./litecoind -blocknotify will go wrong. 
     '''
     
-    def __init__(self, registry, bitcoin_rpc):
-        log.debug("Got To Block Updater")
-        self.bitcoin_rpc = bitcoin_rpc
+    def __init__(self, registry, sia_rpc):
+        log.debug('Got To Block Updater')
+        self.sia_rpc = sia_rpc
         self.registry = registry
         self.clock = None
         self.schedule()
                         
     def schedule(self):
         when = self._get_next_time()
-        log.debug("Next prevhash update in %.03f sec" % when)
-        log.debug("Merkle update in next %.03f sec" % \
+        log.debug('Next prevhash update in %.03f sec' % when)
+        log.debug('Merkle update in next %.03f sec' % \
                   ((self.registry.last_update + settings.MERKLE_REFRESH_INTERVAL)-Interfaces.timestamper.time()))
         self.clock = reactor.callLater(when, self.run)
         
@@ -41,25 +41,25 @@ class BlockUpdater(object):
        
         try:             
             if self.registry.last_block:
-                current_prevhash = "%064x" % self.registry.last_block.hashPrevBlock
+                current_prevhash = '%064x' % self.registry.last_block.hashPrevBlock
             else:
                 current_prevhash = None
                 
-            log.info("Checking for new block.")
-            prevhash = (yield self.bitcoin_rpc.prevhash())
+            log.info('Checking for new block.')
+            prevhash = (yield self.sia_rpc.prevhash())
             if prevhash and prevhash != current_prevhash:
-                log.info("New block! Prevhash: %s" % prevhash)
+                log.info('New block! Prevhash: %s' % prevhash)
                 update = True
             
             elif Interfaces.timestamper.time() - self.registry.last_update >= settings.MERKLE_REFRESH_INTERVAL:
-                log.info("Merkle update! Prevhash: %s" % prevhash)
+                log.info('Merkle update! Prevhash: %s' % prevhash)
                 update = True
                 
             if update:
                 self.registry.update_block()
 
         except Exception:
-            log.exception("UpdateWatchdog.run failed")
+            log.exception('UpdateWatchdog.run failed')
         finally:
             self.schedule()
 
