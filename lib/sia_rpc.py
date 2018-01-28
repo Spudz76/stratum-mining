@@ -13,10 +13,10 @@ import lib.logger
 import lib.settings as settings
 log = lib.logger.get_logger('sia_rpc')
 
-gbt_known_rules = ['segwit'] 
+gbt_known_rules = ['segwit']
 
 class SiaRPC(object):
-    
+
     def __init__(self, host, port, username, password):
         log.debug('Got to Sia RPC')
         self.sia_url = 'http://%s:%d' % (host, port)
@@ -72,8 +72,7 @@ class SiaRPC(object):
             resp = (yield self._call_raw_get('daemon/version'))
             self.version = json.loads(resp)['version']
             log.debug('Sia Daemon responded, version %s', self.version)
-            resp = (yield self._call_raw_get('consensus'))
-            consensus = json.loads(resp)
+            consensus = (yield self.get_consensus())
             if consensus['synced']:
                 self.consensus_ready = True
                 log.debug(
@@ -83,6 +82,46 @@ class SiaRPC(object):
             log.debug('Sia Daemon error: %s' % str(e))
         finally:
               defer.returnValue(self.consensus_ready)
+
+    @defer.inlineCallbacks
+    def get_consensus(self):
+        c = None
+        try:
+            resp = (yield self._call_raw_get('consensus'))
+            consensus = json.loads(resp)
+            if consensus['synced']:
+                c = consensus
+        except Exception as e:
+            log.debug('Sia Daemon error: %s' % str(e))
+        finally:
+            defer.returnValue(c)
+
+    @defer.inlineCallbacks
+    def get_work(self):
+        w = {
+            # 32 (ParentID) + 8 (Nonce) + 8 (Timestamp) + 32 (MerkleRoot)
+            ''
+        'job_id',
+        'prevhash',
+        'coinb1',
+        'coinb2',
+        'merkle_branch',
+        'version',
+        'nbits',
+        'ntime',
+        'clean_jobs'
+
+
+        }
+        try:
+            work = (yield self._call_raw_get('miner/header'))
+            if work:
+
+                w = work
+        except Exception as e:
+            log.debug('Sia Daemon error: %s' % str(e))
+        finally:
+            defer.returnValue(w)
 
     @defer.inlineCallbacks
     def submitblock(self, block_hex, hash_hex, scrypt_hex):
@@ -148,7 +187,7 @@ class SiaRPC(object):
     def getinfo(self):
          resp = (yield self._call('getinfo', []))
          defer.returnValue(json.loads(resp)['result'])
-    
+
     @defer.inlineCallbacks
     def getblocktemplate(self):
         try:
@@ -164,7 +203,7 @@ class SiaRPC(object):
                 defer.returnValue(json.loads(resp)['result'])
             else:
                 raise
-                                                  
+
     @defer.inlineCallbacks
     def prevhash(self):
         try:
@@ -174,11 +213,11 @@ class SiaRPC(object):
         except Exception as e:
             if (str(e) == '500 Internal Server Error'):
                 resp = (yield self._call('getwork', []))
-                defer.returnValue(util.reverse_hash(json.loads(resp)['result']['data'][8:72])) 
+                defer.returnValue(util.reverse_hash(json.loads(resp)['result']['data'][8:72]))
             else:
                 log.exception('Cannot decode prevhash %s' % str(e))
                 raise
-        
+
     @defer.inlineCallbacks
     def validateaddress(self, address):
         resp = (yield self._call('validateaddress', [address,]))

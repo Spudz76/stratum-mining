@@ -105,7 +105,7 @@ class PredictableTimestamperInterface(TimestamperInterface):
     '''Predictable timestamper may be useful for unit testing.'''
     start_time = 1345678900  # Some day in year 2012
     delta = 0
-    
+
     def time(self):
         self.delta += 1
         return self.start_time + self.delta
@@ -120,7 +120,7 @@ class Interfaces(object):
     @classmethod
     def set_worker_manager(cls, manager):
         cls.worker_manager = manager    
-    
+
     @classmethod        
     def set_share_manager(cls, manager):
         cls.share_manager = manager
@@ -128,11 +128,11 @@ class Interfaces(object):
     @classmethod        
     def set_share_limiter(cls, limiter):
         cls.share_limiter = limiter
-    
+
     @classmethod
     def set_timestamper(cls, manager):
         cls.timestamper = manager
-        
+
     @classmethod
     def set_template_registry(cls, registry):
         dbi.set_bitcoinrpc(registry.sia_rpc)

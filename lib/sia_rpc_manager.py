@@ -17,7 +17,7 @@ from lib.sia_rpc import SiaRPC
 
 
 class SiaRPCManager(object):
-    
+
     def __init__(self):
         log.debug('Got to Sia RPC Manager')
         self.conns = {}
@@ -90,12 +90,27 @@ class SiaRPCManager(object):
                 return self.conns[self.curr_conn]._call(method,params)
             except:
                 self.next_connection()
+
     def check_ready(self):
         while True:
-              try:
-                  return self.conns[self.curr_conn].check_ready()
-              except:
-                  self.next_connection()
+            try:
+                return self.conns[self.curr_conn].check_ready()
+            except:
+                self.next_connection()
+
+    def get_consensus(self):
+        while True:
+            try:
+                return self.conns[self.curr_conn].get_consensus()
+            except:
+                self.next_connection()
+
+    def get_work(self):
+        while True:
+            try:
+                return self.conns[self.curr_conn].get_work()
+            except:
+                self.next_connection()
 
     def submitblock(self, block_hex, hash_hex, scrypt_hex):
         while True:
@@ -110,7 +125,7 @@ class SiaRPCManager(object):
                 return self.conns[self.curr_conn].getinfo()
             except:
                 self.next_connection()
-    
+
     def getblocktemplate(self):
         while True:
             try:
@@ -125,7 +140,7 @@ class SiaRPCManager(object):
                 return self.conns[self.curr_conn].prevhash()
             except:
                 self.next_connection()
-        
+
     def validateaddress(self, address):
         while True:
             try:

@@ -1,3 +1,6 @@
+[submodule "externals/sia-mining-proxy"]
+	path = externals/sia-mining-proxy
+	url = https://github.com/SiaMining/stratum-mining-proxy.git
 [submodule "externals/stratum"]
 	path = externals/stratum
 	url = https://github.com/Spudz76/stratum.git
